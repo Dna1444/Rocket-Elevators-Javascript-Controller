@@ -253,3 +253,4 @@ function senario3(){
     scenario = C1.requestElevator(10, "down")
     scenario.requestFloor(3)
 }
+module.exports = {Column, Elevator, CallButton, FloorRequestButton, Door}
