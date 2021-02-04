@@ -1,0 +1,19 @@
+{
+  "name": "residential_controller",
+  "version": "1.0.0",
+  "description": "elevator controler for resisdential",
+  "main": "residential_controller.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dna1444/Rocket-Elevators-Javascript-Controller.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dna1444/Rocket-Elevators-Javascript-Controller/issues"
+  },
+  "homepage": "https://github.com/Dna1444/Rocket-Elevators-Javascript-Controller#readme"
+}
