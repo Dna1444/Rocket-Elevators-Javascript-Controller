@@ -8,12 +8,12 @@ let door_id = 1
 class Column {
 
     constructor(_id, _status, _amountOfFloors, _amountOfElevator){
-        this.elevator_list = []
-        this.call_button_list = []
-        this.id = _id
+        this.elevatorsList = []
+        this.callButtonsList = []
+        this.ID = _id
         this.status = _status
-        this.amount_of_floors = _amountOfFloors
-        this.amount_of_elevator = _amountOfElevator
+        this.amountOfFloors = _amountOfFloors
+        this.amountOfElevators = _amountOfElevator
 
         this.createCallButtons(_amountOfFloors)
         this.createElevators(_amountOfElevator, _amountOfFloors)
@@ -26,12 +26,12 @@ class Column {
         for(let i = 0; i< number_of_floor; i++){
             if (button_floor < _amountOfFloors){
                 let call_button =new CallButton(call_button_id, "off", button_floor, "up")
-                this.call_button_list.push(call_button)
+                this.callButtonsList.push(call_button)
                 call_button_id ++
             }
             if (button_floor > 1){
                let call_button = new CallButton(call_button_id, "off", button_floor, "down")
-               this.call_button_list.push(call_button)
+               this.callButtonsList.push(call_button)
                call_button_id ++
             }
             
@@ -43,7 +43,7 @@ class Column {
         let number_of_elevator = _amountOfElevator
         for(let i = 0; i < number_of_elevator; i++){
             let elevator = new Elevator(elevator_id, "idle", _amountOfFloors, 1)
-            this.elevator_list.push(elevator)
+            this.elevatorsList.push(elevator)
             elevator_id ++
         }
     }
@@ -51,7 +51,7 @@ class Column {
     requestElevator(floor, direction){
         let elevator = this.findElevator(floor, direction)
         console.log(elevator)
-        elevator.floor_request_list.push(floor)
+        elevator.floorRequestList.push(floor)
         elevator.sortFloorList()
         elevator.move()
         elevator.operateDoors()
@@ -66,12 +66,12 @@ class Column {
             referenceGap: 10000000}
         
 
-        this.elevator_list.forEach(elevator => {
-            if (floor == elevator.position && elevator.status == "idle"){
+        this.elevatorsList.forEach(elevator => {
+            if (floor == elevator.currentFloor && elevator.status == "idle"){
                 bestElevatorInformation = this.checkIfElevatorIsBetter(1, elevator, bestElevatorInformation, floor)
-            }else if (floor > elevator.position && elevator.direction == "up" && direction == elevator.direction){
+            }else if (floor > elevator.currentFloor && elevator.direction == "up" && direction == elevator.direction){
                 bestElevatorInformation = this.checkIfElevatorIsBetter(2, elevator, bestElevatorInformation, floor)
-            }else if (floor < elevator.position && elevator.direction == "down" && direction == elevator.direction){
+            }else if (floor < elevator.currentFloor && elevator.direction == "down" && direction == elevator.direction){
                 bestElevatorInformation = this.checkIfElevatorIsBetter(2, elevator, bestElevatorInformation, floor)
             }else if (elevator.status == "idle"){
                 bestElevatorInformation = this.checkIfElevatorIsBetter(3, elevator, bestElevatorInformation, floor)
@@ -90,10 +90,10 @@ class Column {
         if (scoreToCheck < bestElevatorInformation.bestScore){
             bestElevatorInformation.bestScore = scoreToCheck
             bestElevatorInformation.bestElevator = newElevator
-            bestElevatorInformation.referenceGap = Math.abs(newElevator.position - floor)
+            bestElevatorInformation.referenceGap = Math.abs(newElevator.currentFloor - floor)
 
         }else if (bestElevatorInformation.bestScore == scoreToCheck){
-            let gap = Math.abs(newElevator.position - floor)
+            let gap = Math.abs(newElevator.currentFloor - floor)
             if (bestElevatorInformation.referenceGap > gap){
                 bestElevatorInformation.bestElevator = newElevator
                 bestElevatorInformation.referenceGap = gap
@@ -103,8 +103,8 @@ class Column {
         return bestElevatorInformation
     }
     checkRequestList(){  //only use for senario 3 
-        this.elevator_list.forEach(elevator => {
-            if (elevator.floor_request_list != []){
+        this.elevatorsList.forEach(elevator => {
+            if (elevator.floorRequestList != []){
                 elevator.sortFloorList()
                 elevator.move()
                 elevator.operateDoors()
@@ -115,7 +115,7 @@ class Column {
 }
 class CallButton{
     constructor(_id, _status, _floor, _direction){
-        this.id = _id
+        this.ID = _id
         this.status = _status
         this.floor = _floor
         this.direction = _direction
@@ -124,14 +124,14 @@ class CallButton{
 }
 class Elevator{
     constructor(_id, _status, _amountOfFloors, _currentFloor){
-        this.id = _id
+        this.ID = _id
         this.status = _status
         this.direction = "null"
-        this.amount_of_floor = _amountOfFloors
-        this.position = _currentFloor
+        this.amountOfFloors = _amountOfFloors
+        this.currentFloor = _currentFloor
         this.door = new Door(door_id, "close")
-        this.floor_request_button = []
-        this.floor_request_list = []
+        this.floorRequestButtonsList = []
+        this.floorRequestList = []
 
         this.createFloorRequestButton(_amountOfFloors)
     }
@@ -140,14 +140,14 @@ class Elevator{
         let button_floor = 1
         for(let i = 0; i < _amountOfFloors; i++){
             let floorRequestButton = new FloorRequestButton(i + 1, "off", button_floor)
-            this.floor_request_button.push(floorRequestButton)
+            this.floorRequestButtonsList.push(floorRequestButton)
             
             button_floor += 1
         }
     }
     //requesting a floor once inside elevator
     requestFloor(floor){
-        this.floor_request_list.push(floor)
+        this.floorRequestList.push(floor)
         this.sortFloorList()
         this.move()
         this.operateDoors()
@@ -156,38 +156,38 @@ class Elevator{
         
     //move the elevator in the right direction
     move(){
-        while (this.floor_request_list.length != 0){
-            let destination = this.floor_request_list[0]
+        while (this.floorRequestList.length != 0){
+            let destination = this.floorRequestList[0]
             this.status = "moving"
-            console.log("elevator" + this.id + " is moving")
-            if (this.position < destination){
+            console.log("elevator" + this.ID + " is moving")
+            if (this.currentFloor < destination){
                 console.log("elevator going up")
                 this.direction = "up"
-                while (this.position < destination){
-                    this.position ++ 
-                    console.log("elevator" + this.id + " moving to floor" + this.position,)
+                while (this.currentFloor < destination){
+                    this.currentFloor ++ 
+                    console.log("elevator" + this.ID + " moving to floor" + this.currentFloor,)
                 }
-            }else if (this.position > destination){
+            }else if (this.currentFloor > destination){
                 console.log("elevator going down")
                 this.direction = "down"
-                while (this.position > destination){
-                    this.position --
-                    console.log("elevator" + this.id + " moving to floor" + this.position,)
+                while (this.currentFloor > destination){
+                    this.currentFloor --
+                    console.log("elevator" + this.ID + " moving to floor" + this.currentFloor,)
                 }
             }
             this.status = "idle"
             this.direction = "null"
-            console.log("elevator " + this.id + " is stopped" )
-            this.floor_request_list.shift()
+            console.log("elevator " + this.ID + " is stopped" )
+            this.floorRequestList.shift()
             
         }
     }
     //sort my floor list
     sortFloorList(){
         if (this.direction == "up"){
-            this.floor_request_list.sort(function(a, b){return a-b});
+            this.floorRequestList.sort(function(a, b){return a-b});
         }else{
-            this.floor_request_list.sort(function(a, b){return b-a});
+            this.floorRequestList.sort(function(a, b){return b-a});
         }
     }
     //open door and close after 5 sec
@@ -203,14 +203,14 @@ class Elevator{
 
 class Door{
     constructor(_id, _status){
-        this.id = _id
+        this.ID = _id
         this.status = _status
     }
 }
 
 class FloorRequestButton{
     constructor(_id, _status, _floor){
-        this.id = _id
+        this.ID = _id
         this.status = _status
         this.floor = _floor
     }
@@ -222,16 +222,16 @@ class FloorRequestButton{
 
 function senario1(){
     let C1 = new Column(1, "online", 10, 2)
-    C1.elevator_list[0].position = 2
-    C1.elevator_list[1].position = 6
+    C1.elevatorsList[0].currentFloor = 2
+    C1.elevatorsList[1].currentFloor = 6
     let scenario = C1.requestElevator(3, "up")
     scenario.requestFloor(7)
 }
     
 function senario2(){
     let C1 = new Column(1, "online", 10, 2)
-    C1.elevator_list[0].position = 10
-    C1.elevator_list[1].position = 3
+    C1.elevatorsList[0].currentFloor = 10
+    C1.elevatorsList[1].currentFloor = 3
     let scenario = C1.requestElevator(1, "up")
     scenario.requestFloor(6)
     scenario = C1.requestElevator(3, "up")
@@ -243,10 +243,10 @@ function senario2(){
 
 function senario3(){
     let C1 = new Column(1, "online", 10, 2)
-    C1.elevator_list[0].position = 10
-    C1.elevator_list[1].position = 3
-    C1.elevator_list[1].status = "moving"
-    C1.elevator_list[1].floor_request_list.push(6)
+    C1.elevatorsList[0].currentFloor = 10
+    C1.elevatorsList[1].currentFloor = 3
+    C1.elevatorsList[1].status = "moving"
+    C1.elevatorsList[1].floorRequestList.push(6)
     let scenario = C1.requestElevator(3, "down")
     scenario.requestFloor(2)
     C1.checkRequestList()
